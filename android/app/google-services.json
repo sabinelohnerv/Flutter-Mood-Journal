@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "492406327720",
+    "project_id": "etherease",
+    "storage_bucket": "etherease.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:492406327720:android:64f8668438def89193b59d",
+        "android_client_info": {
+          "package_name": "com.example.ether_ease"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwALKhR8xwc9qd7ImBRLvzrwciRWnEWug"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
