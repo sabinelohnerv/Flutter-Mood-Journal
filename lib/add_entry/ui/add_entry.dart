@@ -1,9 +1,11 @@
+import 'package:ether_ease/add_entry/bloc/add_entry_bloc.dart';
+import 'package:ether_ease/add_entry/bloc/add_entry_event.dart';
+import 'package:ether_ease/add_entry/bloc/add_entry_state.dart';
 import 'package:ether_ease/functions/util.dart';
 import 'package:ether_ease/widgets/app_background.dart';
-import 'package:ether_ease/widgets/mood_picker.dart';
-import 'package:ether_ease/services/add_entries_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ether_ease/add_entry/widgets/mood_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddEntry extends StatefulWidget {
   const AddEntry({super.key});
@@ -16,7 +18,6 @@ class AddEntry extends StatefulWidget {
 
 class _AddEntryState extends State<AddEntry> {
   final _form = GlobalKey<FormState>();
-  final _addEntriesService = AddEntriesService();
   String _enteredBest = "";
   String _enteredWorst = "";
   String _enteredAdditional = "";
@@ -39,43 +40,46 @@ class _AddEntryState extends State<AddEntry> {
     }
   }
 
-  void _saveEntry() async {
+  void _saveEntry() {
     final isValid = _form.currentState!.validate();
-    if (!isValid || _selectedDate == null) {
+    if (!isValid || _selectedDate == null || _selectedEmotion == null) {
       return;
     }
-    
-    String docId = '${_addEntriesService.getCurrentUserId()}_${_selectedDate!.toUtc().toString().split(' ')[0]}';
-
-    DocumentSnapshot snapshot = await _addEntriesService.entriesCollection.doc(docId).get();
-
-    if (snapshot.exists) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Ya has agregado una entrada para este día.')),
-      );
-      return;
-    } 
 
     _form.currentState!.save();
-    try {
-      await _addEntriesService.addEntry(
-        best: _enteredBest,
-        worst: _enteredWorst,
-        additional: _enteredAdditional,
-        emotion: _selectedEmotion!,
-        date: _selectedDate!,
-      );
-      Navigator.of(context).pop();
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Ha ocurrido un error. Vuelve a intentarlo más tarde.')),
-      );
-    }
-}
-
+    context.read<AddEntryBloc>().add(
+          SaveEntryEvent(
+            _enteredBest,
+            _enteredWorst,
+            _enteredAdditional,
+            _selectedEmotion!,
+            _selectedDate!,
+          ),
+        );
+  }
 
   @override
   Widget build(BuildContext context) {
+    return BlocListener<AddEntryBloc, AddEntryState>(
+      listener: (context, state) {
+        if (state is EntrySaveSuccessState) {
+          Navigator.of(context).pop();
+        } else if (state is EntryAlreadyExistsState) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Ya has agregado una entrada para este día.')),
+          );
+        } else if (state is EntrySaveErrorState) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
+        }
+      },
+      child: addEntryForm(context),
+    );
+  }
+
+  Scaffold addEntryForm(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -252,9 +256,9 @@ class _AddEntryState extends State<AddEntry> {
                         ElevatedButton(
                           onPressed: _saveEntry,
                           style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green.shade50,
-                              foregroundColor: Colors.green.shade900,
-                            ),
+                            backgroundColor: Colors.green.shade50,
+                            foregroundColor: Colors.green.shade900,
+                          ),
                           child: const Text('Guardar'),
                         ),
                       ],

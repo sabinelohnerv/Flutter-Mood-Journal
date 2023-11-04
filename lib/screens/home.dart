@@ -1,4 +1,4 @@
-import 'package:ether_ease/screens/add_entry.dart';
+import 'package:ether_ease/add_entry/ui/add_entry.dart';
 import 'package:ether_ease/screens/tab_screens/entries.dart';
 import 'package:ether_ease/screens/tab_screens/stats.dart';
 import 'package:flutter/material.dart';
