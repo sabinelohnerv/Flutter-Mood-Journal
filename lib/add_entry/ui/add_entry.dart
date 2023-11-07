@@ -4,6 +4,7 @@ import 'package:ether_ease/add_entry/bloc/add_entry_state.dart';
 import 'package:ether_ease/functions/util.dart';
 import 'package:ether_ease/widgets/app_background.dart';
 import 'package:ether_ease/add_entry/widgets/mood_picker.dart';
+import 'package:ether_ease/add_entry/widgets/activity_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -23,6 +24,7 @@ class _AddEntryState extends State<AddEntry> {
   String _enteredAdditional = "";
   DateTime? _selectedDate;
   var _selectedEmotion;
+  var _selectedEmotionactivity;
 
   void _presentDatePicker() async {
     final now = DateTime.now();
@@ -42,7 +44,10 @@ class _AddEntryState extends State<AddEntry> {
 
   void _saveEntry() {
     final isValid = _form.currentState!.validate();
-    if (!isValid || _selectedDate == null || _selectedEmotion == null) {
+    if (!isValid ||
+        _selectedDate == null ||
+        _selectedEmotion == null ||
+        _selectedEmotionactivity == null) {
       return;
     }
 
@@ -54,6 +59,7 @@ class _AddEntryState extends State<AddEntry> {
             _enteredAdditional,
             _selectedEmotion!,
             _selectedDate!,
+            _selectedEmotionactivity!,
           ),
         );
   }
@@ -233,6 +239,24 @@ class _AddEntryState extends State<AddEntry> {
                         MoodPicker(onSelectEmotion: (selectedEmotion) {
                           _selectedEmotion = selectedEmotion;
                         }),
+
+                        //Actividades
+                        Text(
+                          "¿Qué actividad describe día?",
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey.shade800),
+                        ),
+                        const SizedBox(
+                          height: 2,
+                        ),
+                        MoodPickerActivity(
+                            onSelectActivity: (selectedActivity) {
+                          _selectedEmotionactivity = selectedActivity;
+                        }),
+                        //Actividades
+
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [

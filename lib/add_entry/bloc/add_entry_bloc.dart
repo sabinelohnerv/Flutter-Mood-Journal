@@ -15,6 +15,7 @@ class AddEntryBloc extends Bloc<AddEntryEvent, AddEntryState> {
           additional: event.additional,
           emotion: event.emotion,
           date: event.date,
+          activity: event.emotionactivity,
         );
         emit(EntrySaveSuccessState());
       } catch (error) {
