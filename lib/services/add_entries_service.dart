@@ -23,7 +23,8 @@ class AddEntriesService {
     required DateTime date,
   }) async {
     final userId = getCurrentUserId();
-    String docId = '${userId}_${DateTime.now().toUtc().toString().split(' ')[0]}';
+    // Incluye la hora, minutos, segundos y milisegundos en el docId para asegurarte de que sea único
+    String docId = '${userId}_${date.toUtc().millisecondsSinceEpoch}';
     await entriesCollection.doc(docId).set(
       {
         'best': best,
