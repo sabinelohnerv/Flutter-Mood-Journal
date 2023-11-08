@@ -80,6 +80,11 @@ flutter:
     - assets/images/abrumado.png
     - assets/images/enojado.png
     - assets/images/estresado.png
+    - assets/images/baile.png
+    - assets/images/pasearperro.png
+    - assets/images/tarea.png
+    - assets/images/videojuegos.png
+    - assets/images/ejercicio.png
     - assets/images/app_background.png
 
 

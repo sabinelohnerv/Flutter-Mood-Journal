@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ether_ease/models/mood.dart';
+import 'package:ether_ease/models/mood_activity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AddEntriesService {
@@ -21,9 +22,10 @@ class AddEntriesService {
     String? additional,
     required Emotion emotion,
     required DateTime date,
+    required EmotionActivity activity,
   }) async {
     final userId = getCurrentUserId();
-    String docId = '${userId}_${DateTime.now().toUtc().toString().split(' ')[0]}';
+    String docId = '${userId}_${date.toUtc().toString().split(' ')[0]}';
     await entriesCollection.doc(docId).set(
       {
         'best': best,
@@ -32,6 +34,7 @@ class AddEntriesService {
         'emotion': emotion.toString().split('.').last,
         'date': date,
         'user': userId,
+        'activity': activity.toString().split('.').last,
       },
     );
   }

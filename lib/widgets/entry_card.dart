@@ -14,6 +14,8 @@ class EntryCard extends StatelessWidget {
     String? additional = entry['additional'];
     String emotion = entry['emotion'];
     DateTime date = (entry['date'] as Timestamp).toDate();
+    String activity = entry['activity'].toString();
+    activity = activity.substring(0, 1).toUpperCase() + activity.substring(1);
 
     return Container(
       margin: const EdgeInsets.all(10),
@@ -42,7 +44,9 @@ class EntryCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 20,),
+              const SizedBox(
+                width: 20,
+              ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,6 +73,11 @@ class EntryCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       maxLines: 3,
                     ),
+                    Text(
+                      'Actividad: $activity',
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 3,
+                    )
                   ],
                 ),
               ),
