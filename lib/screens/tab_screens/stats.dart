@@ -1,14 +1,15 @@
-import 'dart:math';
+import 'package:ether_ease/widgets/app_background.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:ether_ease/widgets/app_background.dart';
 
 class StatsScreen extends StatefulWidget {
-  const StatsScreen({Key? key}) : super(key: key);
+  const StatsScreen({super.key});
 
   @override
-  State<StatsScreen> createState() => _StatsScreenState();
+  State<StatefulWidget> createState() {
+    return _StatsScreenState();
+  }
 }
 
 class _StatsScreenState extends State<StatsScreen> {
@@ -25,6 +26,27 @@ class _StatsScreenState extends State<StatsScreen> {
     'frustrado': 0,
     'abrumado': 0,
     'enojado': 0,
+  };
+
+  // Contadores para las categorías de emociones
+  Map<String, int> categoryCounts = {
+    'positivo': 0,
+    'neutro': 0,
+    'negativo': 0,
+  };
+
+  // Mapeo de emociones a categorías
+  Map<String, String> emotionToCategory = {
+    'feliz': 'positivo',
+    'emocionado': 'positivo',
+    'contento': 'positivo',
+    'neutro': 'neutro',
+    'triste': 'negativo',
+    'ansioso': 'negativo',
+    'estresado': 'negativo',
+    'frustrado': 'negativo',
+    'abrumado': 'negativo',
+    'enojado': 'negativo',
   };
 
   final Map<String, int> countActivities = {
@@ -46,139 +68,173 @@ class _StatsScreenState extends State<StatsScreen> {
     final snapshots =
         await _entriesCollection.where('user', isEqualTo: user.uid).get();
 
+    emotionCounts.forEach((key, value) {
+      emotionCounts[key] = 0;
+    });
+    categoryCounts.forEach((key, value) {
+      categoryCounts[key] = 0;
+    });
+    countActivities.forEach((key, value) {
+      countActivities[key] = 0;
+    });
+
     for (var doc in snapshots.docs) {
-      final data = doc.data() as Map<String, dynamic>;
+      final data = doc.data();
       final emotion = data['emotion'] as String?;
       final activity = data['activity'] as String?;
 
-      if (emotion != null && emotionCounts.containsKey(emotion)) {
-        emotionCounts[emotion] = emotionCounts[emotion]! + 1;
+      if (emotion != null) {
+        emotionCounts[emotion] = (emotionCounts[emotion] ?? 0) + 1;
+
+        final category = emotionToCategory[emotion];
+        if (category != null) {
+          categoryCounts[category] = (categoryCounts[category] ?? 0) + 1;
+        }
       }
 
-      if (activity != null && countActivities.containsKey(activity)) {
-        countActivities[activity] = countActivities[activity]! + 1;
+      if (activity != null) {
+        countActivities[activity] = (countActivities[activity] ?? 0) + 1;
       }
     }
+
     setState(() {});
-  }
-
-  List<Widget> _buildActivityBars(double maxBarWidth, int maxActivityCount) {
-      final barColor = Colors.blue.shade400;
-      return countActivities.entries.map((entry) {
-      final activity = entry.key;
-      final count = entry.value;
-      final barWidth = (count / maxActivityCount) * maxBarWidth;
-
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Container(
-              height: 20,
-              width: barWidth.isNaN
-                  ? 0.0
-                  : barWidth, 
-              color: barColor,
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 4.0),
-                  child: Text(count.toString(),
-                      style: const TextStyle(color: Colors.white)),
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Text(activity.toUpperCase()),
-          ],
-        ),
-      );
-    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    final totalEmotions =
+        emotionCounts.values.fold(0, (prev, count) => prev + count);
     final screenWidth = MediaQuery.of(context).size.width;
-    final maxBarWidth = screenWidth * 0.55;
+    final barMaxWidth = screenWidth * 0.75;
+    final Color barColor = Colors.green.shade400;
+    Widget buildStatBar(String label, int count, Color color) {
+      final barWidth = (count / totalEmotions) * barMaxWidth;
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        child: Row(
+          children: [
+            Text(label.toUpperCase()),
+            const SizedBox(width: 10),
+            Container(
+              height: 20,
+              width: barWidth.isNaN ? 0.0 : barWidth,
+              color: color,
+            ),
+            const SizedBox(width: 10),
+            Text('$count'),
+          ],
+        ),
+      );
+    }
 
-    final maxEmotionCount = emotionCounts.values.reduce(max);
-    final maxActivityCount = countActivities.values.reduce(max);
+    List<Widget> buildCategoryStats() {
+      List<Widget> stats = [];
+      categoryCounts.forEach((category, count) {
+        Color color;
+        switch (category) {
+          case 'positivo':
+            color = Colors.blue;
+            break;
+          case 'neutro':
+            color = Colors.amber;
+            break;
+          case 'negativo':
+            color = Colors.red;
+            break;
+          default:
+            color = Colors.grey;
+        }
+        stats.add(buildStatBar(category, count, color));
+      });
+      return stats;
+    }
 
+List<Widget> buildActivityStats() {
+  List<Widget> stats = [];
+  countActivities.forEach((activity, count) {
+    if (count > 0) { 
+      Color color = Colors.green; 
+      stats.add(buildStatBar(activity, count, color));
+    }
+  });
+  return stats;
+}
+    
     return Scaffold(
-      body: Stack(
-        children: [
-          const AppBackground(imagePath: 'assets/images/app_background.png'),
-          Center(
-            child: Card(
-              color: Colors.green.shade900,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Container(
-                  margin: const EdgeInsets.all(10),
-                  width: screenWidth * 0.92,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.green.shade50,
-                  ),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ...emotionCounts.entries.map((entry) {
-                          final emotion = entry.key;
-                          final count = entry.value;
-                          final barWidth =
-                              (count / maxEmotionCount) * maxBarWidth;
-                          return _buildBar(
-                            color: Colors.green.shade400,
-                            label: emotion.toUpperCase(),
-                            barWidth: barWidth,
-                            count: count,
-                          );
-                        }).toList(),
-                        // Activity bars
-                        ..._buildActivityBars(maxBarWidth, maxActivityCount),
-                      ],
+      appBar: AppBar(
+        title: Text('Estadísticas de Ánimo'),
+      ),
+      body: SingleChildScrollView(
+        child: Stack(
+          children: [
+            const AppBackground(imagePath: 'assets/images/app_background.png'),
+            Padding(
+              // Agregar padding para dar espacio al contenido
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Card(
+                    color: Colors.green.shade900,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Container(
+                        width: screenWidth * 0.92,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.green.shade50,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: emotionCounts.entries.map((entry) {
+                            return buildStatBar(
+                                entry.key, entry.value, barColor);
+                          }).toList(),
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  SizedBox(height: 20),
+                  Card(
+                    color: Colors.green.shade900,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Container(
+                        width: screenWidth * 0.92,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.blue.shade50,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: buildCategoryStats(),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Card(
+                    color: Colors.green.shade900,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Container(
+                        width: screenWidth * 0.92,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.red.shade50,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: buildActivityStats(),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBar(
-      {required Color color,
-      required String label,
-      required double barWidth,
-      required int count}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Container(
-            height: 20,
-            width: barWidth.isNaN
-                ? 0.0
-                : barWidth, 
-            color: color,
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 4.0),
-                child: Text(count.toString(),
-                    style: const TextStyle(color: Colors.white)),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Text(label),
-        ],
+          ],
+        ),
       ),
     );
   }
