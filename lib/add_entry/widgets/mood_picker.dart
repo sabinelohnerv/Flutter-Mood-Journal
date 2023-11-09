@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ether_ease/models/mood.dart';
 
 class MoodPicker extends StatefulWidget {
-  const MoodPicker({super.key, required this.onSelectEmotion});
+  const MoodPicker({super.key, required this.onSelectEmotion, required selectedEmotion});
 
   final Function(Emotion?) onSelectEmotion;
 

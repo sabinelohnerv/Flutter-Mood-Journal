@@ -29,6 +29,22 @@ class _AddEntryState extends State<AddEntry> {
   var _selectedEmotion;
   var _selectedEmotionactivity;
 
+  @override
+  void initState() {
+    super.initState();
+    if (widget.entryData != null) {
+      _enteredBest = widget.entryData['best'] ?? "";
+      _enteredWorst = widget.entryData['worst'] ?? "";
+      _enteredAdditional = widget.entryData['additional'] ?? "";
+
+      var timestamp = widget.entryData['date'];
+      _selectedDate = timestamp.toDate();
+
+      _selectedEmotion = widget.entryData['emotion'];
+      _selectedEmotionactivity = widget.entryData['activity'];
+    }
+  }
+
   void _presentDatePicker() async {
     final now = DateTime.now();
     final threeDaysAgo = now.subtract(const Duration(days: 3));
@@ -224,6 +240,7 @@ class _AddEntryState extends State<AddEntry> {
                                   height: 2,
                                 ),
                                 TextFormField(
+                                  initialValue: _enteredBest,
                                   validator: (value) {
                                     return null;
                                   },
@@ -255,9 +272,11 @@ class _AddEntryState extends State<AddEntry> {
                         const SizedBox(
                           height: 2,
                         ),
-                        MoodPicker(onSelectEmotion: (selectedEmotion) {
-                          _selectedEmotion = selectedEmotion;
-                        }),
+                        MoodPicker(
+                            selectedEmotion: _selectedEmotion,
+                            onSelectEmotion: (selectedEmotion) {
+                              _selectedEmotion = selectedEmotion;
+                            }),
 
                         //Actividades
                         Text(
@@ -271,9 +290,10 @@ class _AddEntryState extends State<AddEntry> {
                           height: 2,
                         ),
                         MoodPickerActivity(
+                            selectedActivity: _selectedEmotionactivity,
                             onSelectActivity: (selectedActivity) {
-                          _selectedEmotionactivity = selectedActivity;
-                        }),
+                              _selectedEmotionactivity = selectedActivity;
+                            }),
                         //Actividades
 
                         Row(
