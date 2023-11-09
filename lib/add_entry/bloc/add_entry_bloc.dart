@@ -15,12 +15,28 @@ class AddEntryBloc extends Bloc<AddEntryEvent, AddEntryState> {
           additional: event.additional,
           emotion: event.emotion,
           date: event.date,
-          activity: event.emotionactivity,
+          activity: event.emotionActivity,
         );
         emit(EntrySaveSuccessState());
       } catch (error) {
-        emit(EntrySaveErrorState(
-            'Ha ocurrido un error. Vuelve a intentarlo más tarde.'));
+        emit(EntrySaveErrorState('Ha ocurrido un error al guardar la entrada. Vuelve a intentarlo más tarde.'));
+      }
+    });
+
+    on<UpdateEntryEvent>((event, emit) async {
+      try {
+        await _addEntriesService.updateEntry(
+          userUid: event.userUid, 
+          best: event.best,
+          worst: event.worst,
+          additional: event.additional,
+          emotion: event.emotion,
+          date: event.date,
+          activity: event.emotionActivity,
+        );
+        emit(EntrySaveSuccessState());
+      } catch (error) {
+        emit(EntrySaveErrorState('Ha ocurrido un error al actualizar la entrada. Vuelve a intentarlo más tarde.'));
       }
     });
   }

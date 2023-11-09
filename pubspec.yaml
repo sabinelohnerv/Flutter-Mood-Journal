@@ -81,8 +81,12 @@ flutter:
     - assets/images/enojado.png
     - assets/images/estresado.png
     - assets/images/app_background.png
-
-
+    - assets/images/tarea.png
+    - assets/images/baile.png
+    - assets/images/videojuegos.png
+    - assets/images/pasearperro.png
+    - assets/images/ejercicio.png
+    
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

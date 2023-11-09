@@ -1,3 +1,4 @@
+import 'package:ether_ease/add_entry/ui/add_entry.dart';
 import 'package:ether_ease/widgets/app_background.dart';
 import 'package:ether_ease/widgets/entry_card.dart';
 import 'package:flutter/material.dart';
@@ -57,8 +58,14 @@ class _EntriesScreenState extends State<EntriesScreen> {
           ListView.builder(
             itemCount: entries.length,
             itemBuilder: (context, index) {
+              var entryData = entries[index].data()
+                  as Map<String, dynamic>; // Assure conversion to Map
               return EntryCard(
-                entry: entries[index],
+                entryData: entryData,
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => AddEntry(entryData: entryData)));
+                },
               );
             },
           ),

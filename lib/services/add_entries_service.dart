@@ -38,4 +38,30 @@ class AddEntriesService {
       },
     );
   }
+
+  Future<void> updateEntry({
+    required String userUid,
+    required String best,
+    required String worst,
+    String? additional,
+    required Emotion emotion,
+    required DateTime date,
+    required EmotionActivity activity,
+  }) async {
+    String docId = '${userUid}_${date.toUtc().toString().split(' ')[0]}';
+    await entriesCollection.doc(docId).update(
+      {
+        'best': best,
+        'worst': worst,
+        'additional': additional,
+        'emotion': emotion.toString().split('.').last,
+        'activity': activity.toString().split('.').last,
+      },
+    );
+  }
+
+  Future<DocumentSnapshot> getEntryById(String userUid, DateTime date) async {
+    String docId = '${userUid}_${date.toUtc().toString().split(' ')[0]}';
+    return await entriesCollection.doc(docId).get();
+  }
 }

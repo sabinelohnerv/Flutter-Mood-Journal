@@ -5,11 +5,14 @@ import 'package:ether_ease/functions/util.dart';
 import 'package:ether_ease/widgets/app_background.dart';
 import 'package:ether_ease/add_entry/widgets/mood_picker.dart';
 import 'package:ether_ease/add_entry/widgets/activity_selector.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddEntry extends StatefulWidget {
-  const AddEntry({super.key});
+  const AddEntry({super.key, this.entryData});
+
+  final entryData;
 
   @override
   State<StatefulWidget> createState() {
@@ -52,16 +55,32 @@ class _AddEntryState extends State<AddEntry> {
     }
 
     _form.currentState!.save();
-    context.read<AddEntryBloc>().add(
-          SaveEntryEvent(
-            _enteredBest,
-            _enteredWorst,
-            _enteredAdditional,
-            _selectedEmotion!,
-            _selectedDate!,
-            _selectedEmotionactivity!,
-          ),
-        );
+    String userUid = FirebaseAuth.instance.currentUser!.uid;
+
+    if (widget.entryData == null) {
+      context.read<AddEntryBloc>().add(
+            SaveEntryEvent(
+              _enteredBest,
+              _enteredWorst,
+              _enteredAdditional,
+              _selectedEmotion!,
+              _selectedDate!,
+              _selectedEmotionactivity!,
+            ),
+          );
+    } else {
+      context.read<AddEntryBloc>().add(
+            UpdateEntryEvent(
+              userUid: userUid,
+              date: _selectedDate!,
+              best: _enteredBest,
+              worst: _enteredWorst,
+              additional: _enteredAdditional,
+              emotion: _selectedEmotion!,
+              emotionActivity: _selectedEmotionactivity!,
+            ),
+          );
+    }
   }
 
   @override
